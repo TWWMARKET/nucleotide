@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Docs</title>
+  <title id="page-title">Nucleotide</title>
   <link id="favicon" rel="icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">
   
   <style>
@@ -19,6 +19,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       overflow-x: hidden;
       min-height: 100vh;
+      cursor: default;
     }
 
     #space-bg {
@@ -31,45 +32,83 @@
       pointer-events: none;
     }
 
+    /* Developer Announcement Banner (Toggle on/off via display: none;) */
+    #announcement-banner {
+      display: block; /* Change to 'none' to turn off */
+      background: #1e293b;
+      color: #38bdf8;
+      text-align: center;
+      padding: 8px;
+      font-size: 0.85rem;
+      border-bottom: 1px solid #334155;
+    }
+
+    /* Top Greeting Bar */
+    .top-bar {
+      text-align: center;
+      padding: 6px;
+      background: rgba(15, 23, 42, 0.5);
+      font-size: 0.8rem;
+      color: #64748b;
+      border-bottom: 1px solid #1e293b;
+    }
+
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px 40px;
+      padding: 15px 35px;
       border-bottom: 1px solid #1e293b;
-      background: rgba(11, 15, 25, 0.9);
+      background: rgba(11, 15, 25, 0.95);
     }
 
     .logo {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-size: 1.8rem;
+      font-family: 'Brush Script MT', cursive, sans-serif;
       letter-spacing: 1px;
       color: #f8fafc;
     }
 
+    .nav-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      color: #fff;
+      background: #1e293b;
+    }
+
     .search-box input {
-      padding: 8px 16px;
-      width: 240px;
+      padding: 8px 14px;
+      width: 200px;
       border-radius: 6px;
       border: 1px solid #334155;
       background: #0f172a;
       color: #fff;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       outline: none;
     }
 
-    .search-box input:focus {
-      border-color: #64748b;
-    }
-
     .panic-hint {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #64748b;
     }
 
     .panic-hint kbd {
       background: #1e293b;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 4px;
       border: 1px solid #334155;
       color: #ef4444;
@@ -77,8 +116,16 @@
 
     main {
       max-width: 1100px;
-      margin: 40px auto;
+      margin: 30px auto;
       padding: 0 20px;
+    }
+
+    .section-content {
+      display: none;
+    }
+
+    .section-content.active {
+      display: block;
     }
 
     .game-grid {
@@ -87,7 +134,7 @@
       gap: 20px;
     }
 
-    .game-card {
+    .card {
       background: #0f172a;
       border: 1px solid #1e293b;
       border-radius: 8px;
@@ -97,51 +144,241 @@
       transition: border-color 0.15s ease;
     }
 
-    .game-card:hover {
+    .card:hover {
       border-color: #475569;
     }
 
-    .game-card h3 {
+    .card h3 {
       font-size: 1.1rem;
       margin-top: 10px;
       color: #f8fafc;
     }
 
-    .game-card p {
+    .card p {
       font-size: 0.8rem;
       color: #64748b;
       margin-top: 4px;
     }
+
+    /* Settings Panel Styles */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .settings-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .settings-card h3 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: #f8fafc;
+    }
+
+    .settings-card label {
+      display: block;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    .settings-card select, .settings-card button {
+      width: 100%;
+      padding: 8px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+
+    .color-swatches {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #334155;
+    }
   </style>
 </head>
-<body>
+<body id="body-bg">
+
+  <!-- Developer Announcement Banner (Edit text here, change display in style to toggle off) -->
+  <div id="announcement-banner">
+    📢 <b>Developer Update:</b> Welcome to Nucleotide! More games coming soon.
+  </div>
+
+  <!-- Top Greeting Bar -->
+  <div class="top-bar">
+    <span id="greeting-text">How are you today?</span> | Timezone: <span id="display-timezone">UTC</span> | Battery: <span id="battery-status">Loading...</span>
+  </div>
 
   <canvas id="space-bg"></canvas>
 
   <header>
-    <div class="logo">ATOM</div>
+    <div class="logo">Nucleotide</div>
+    <div class="nav-links">
+      <button class="nav-btn active" onclick="switchTab('games', this)">Games</button>
+      <button class="nav-btn" onclick="switchTab('music', this)">Music</button>
+      <button class="nav-btn" onclick="switchTab('movies', this)">Movies</button>
+      <button class="nav-btn" onclick="switchTab('settings', this)">Settings</button>
+    </div>
     <div class="search-box">
-      <input type="text" id="searchInput" onkeyup="filterGames()" placeholder="Search...">
+      <input type="text" id="searchInput" onkeyup="filterItems()" placeholder="Search...">
     </div>
     <div class="panic-hint">Press <kbd>Esc</kbd> to exit</div>
   </header>
 
   <main>
-    <div class="game-grid" id="gameGrid">
-      <div class="game-card" data-title="Eaglercraft" onclick="alert('Upload your Eaglercraft files to GitHub first!')">
-        <div style="font-size: 2rem;">⛏️</div>
-        <h3>Eaglercraft</h3>
-        <p>Minecraft</p>
+    <!-- GAMES TAB -->
+    <div id="games" class="section-content active">
+      <div class="game-grid" id="itemGrid">
+        <!-- Add your game cards here when ready -->
+        <div class="card" data-title="Example Game">
+          <div style="font-size: 2rem;">🎮</div>
+          <h3>Example Game</h3>
+          <p>Ready for files</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MUSIC TAB -->
+    <div id="music" class="section-content">
+      <div class="game-grid">
+        <div class="card">
+          <div style="font-size: 2rem;">🎵</div>
+          <h3>Music Player</h3>
+          <p>Audio streaming placeholder</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOVIES TAB -->
+    <div id="movies" class="section-content">
+      <div class="game-grid">
+        <div class="card">
+          <div style="font-size: 2rem;">🍿</div>
+          <h3>Movie Streamer</h3>
+          <p>Video placeholder</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="settings" class="section-content">
+      <div class="settings-grid">
+        
+        <!-- Theme & Background Colors -->
+        <div class="settings-card">
+          <h3>Background Color</h3>
+          <div class="color-swatches">
+            <div class="swatch" style="background: #0b0f19;" onclick="setBg('#0b0f19')" title="Dark"></div>
+            <div class="swatch" style="background: #1a0f1f;" onclick="setBg('#1a0f1f')" title="Pink/Purple"></div>
+            <div class="swatch" style="background: #0f1915;" onclick="setBg('#0f1915')" title="Green"></div>
+            <div class="swatch" style="background: #0f1419;" onclick="setBg('#0f1419')" title="Slate Blue"></div>
+          </div>
+        </div>
+
+        <!-- Cursor Styles -->
+        <div class="settings-card">
+          <h3>Cursor Style</h3>
+          <label>Choose Cursor Shape/Color</label>
+          <select onchange="setCursor(this.value)">
+            <option value="default">Default</option>
+            <option value="crosshair">Crosshair</option>
+            <option value="pointer">Pointer Hand</option>
+            <option value="text">I-Beam</option>
+          </select>
+        </div>
+
+        <!-- Tab Cloaker -->
+        <div class="settings-card">
+          <h3>Tab Cloak</h3>
+          <label>Disguise Browser Tab</label>
+          <button onclick="cloakTab('Google Classroom', 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico')">Google Classroom</button>
+          <button onclick="cloakTab('IXL | Math and English', 'https://www.ixl.com/favicon.ico')">IXL</button>
+          <button onclick="cloakTab('Canvas', 'https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico')">Canvas</button>
+          <button onclick="cloakTab('Nucleotide', 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico')">Reset</button>
+        </div>
+
+        <!-- Timezone Settings -->
+        <div class="settings-card">
+          <h3>Timezone Preset</h3>
+          <label>Select Timezone</label>
+          <select onchange="setTimezone(this.value)">
+            <option value="UTC">UTC</option>
+            <option value="America/New_York">Eastern Time (ET)</option>
+            <option value="America/Chicago">Central Time (CT)</option>
+            <option value="America/Denver">Mountain Time (MT)</option>
+            <option value="America/Los_Angeles">Pacific Time (PT)</option>
+          </select>
+        </div>
+
       </div>
     </div>
   </main>
 
   <script>
+    /* Tab Switching Logic */
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.section-content').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    /* Background Color Picker */
+    function setBg(color) {
+      document.getElementById('body-bg').style.backgroundColor = color;
+    }
+
+    /* Cursor Changer */
+    function setCursor(style) {
+      document.body.style.cursor = style;
+    }
+
+    /* Tab Cloaker */
+    function cloakTab(title, iconUrl) {
+      document.getElementById('page-title').innerText = title;
+      document.getElementById('favicon').href = iconUrl;
+    }
+
+    /* Timezone Selector */
+    function setTimezone(tz) {
+      document.getElementById('display-timezone').innerText = tz;
+    }
+
+    /* Device Battery API */
+    if (navigator.getBattery) {
+      navigator.getBattery().then(battery => {
+        function updateBattery() {
+          let percent = Math.round(battery.level * 100);
+          document.getElementById('battery-status').innerText = percent + '%';
+        }
+        updateBattery();
+        battery.addEventListener('levelchange', updateBattery);
+      });
+    } else {
+      document.getElementById('battery-status').innerText = 'N/A';
+    }
+
+    /* Space Background Particles */
     const canvas = document.getElementById('space-bg');
     const ctx = canvas.getContext('2d');
-
     let particles = [];
-    const numParticles = 80;
+    const numParticles = 60;
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
@@ -154,26 +391,22 @@
       constructor() {
         this.reset();
       }
-
       reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
         this.size = Math.random() * 1.5 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.2;
-        this.speedY = (Math.random() - 0.5) * 0.2;
-        this.alpha = Math.random() * 0.5 + 0.1;
+        this.speedX = (Math.random() - 0.5) * 0.1;
+        this.speedY = (Math.random() - 0.5) * 0.1;
+        this.alpha = Math.random() * 0.4 + 0.1;
       }
-
       update() {
         this.x += this.speedX;
         this.y += this.speedY;
-
         if (this.x < 0) this.x = canvas.width;
         if (this.x > canvas.width) this.x = 0;
         if (this.y < 0) this.y = canvas.height;
         if (this.y > canvas.height) this.y = 0;
       }
-
       draw() {
         ctx.save();
         ctx.globalAlpha = this.alpha;
@@ -199,16 +432,17 @@
     }
     animate();
 
-    function filterGames() {
+    /* Search Filter */
+    function filterItems() {
       let input = document.getElementById('searchInput').value.toLowerCase();
-      let cards = document.getElementsByClassName('game-card');
-
-      for (let card of cards) {
+      let cards = document.querySelectorAll('#itemGrid .card');
+      cards.forEach(card => {
         let title = card.getAttribute('data-title').toLowerCase();
         card.style.display = title.includes(input) ? 'block' : 'none';
-      }
+      });
     }
 
+    /* Panic Key */
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         window.location.href = 'https://classroom.google.com';
