@@ -14,9 +14,9 @@
     }
 
     body {
-      background-color: #03050a;
-      color: #ffffff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       overflow-x: hidden;
       min-height: 100vh;
     }
@@ -35,120 +35,82 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 18px 35px;
-      background: rgba(3, 5, 10, 0.85);
-      border-bottom: 2px solid rgba(0, 229, 255, 0.3);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      padding: 20px 40px;
+      border-bottom: 1px solid #1e293b;
+      background: rgba(11, 15, 25, 0.9);
     }
 
     .logo {
-      font-size: 2.2rem;
-      font-weight: 900;
-      letter-spacing: 4px;
-      color: #00ffff;
-      text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
-      font-family: monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #f8fafc;
     }
 
-    /* Bold, styled search box */
     .search-box input {
-      padding: 12px 20px;
-      width: 280px;
-      border-radius: 8px;
-      border: 2px solid #00ffff;
-      background: rgba(0, 0, 0, 0.6);
-      color: #ffffff;
-      font-size: 1rem;
-      font-weight: bold;
+      padding: 8px 16px;
+      width: 240px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #fff;
+      font-size: 0.9rem;
       outline: none;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
     }
 
     .search-box input:focus {
-      width: 330px;
-      background: rgba(0, 20, 30, 0.8);
-      box-shadow: 0 0 18px rgba(0, 255, 255, 0.5);
+      border-color: #64748b;
     }
 
     .panic-hint {
-      font-size: 0.85rem;
-      color: #a0aec0;
-      font-weight: 600;
+      font-size: 0.8rem;
+      color: #64748b;
     }
 
     .panic-hint kbd {
-      background: #1a202c;
-      padding: 4px 8px;
+      background: #1e293b;
+      padding: 2px 6px;
       border-radius: 4px;
-      border: 1px solid #4a5568;
-      color: #ff5555;
-      font-weight: bold;
+      border: 1px solid #334155;
+      color: #ef4444;
     }
 
     main {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 40px auto;
       padding: 0 20px;
     }
 
-    .hero-title {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .hero-title h2 {
-      font-size: 3rem;
-      font-weight: 900;
-      letter-spacing: 2px;
-      color: #ffffff;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-      margin-bottom: 10px;
-    }
-
-    .hero-title p {
-      color: #a0aec0;
-      font-size: 1.1rem;
-      font-weight: 500;
-    }
-
     .game-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 25px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
     }
 
     .game-card {
-      background: rgba(10, 15, 25, 0.8);
-      border: 2px solid #1a365d;
-      border-radius: 12px;
-      padding: 25px;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: border-color 0.15s ease;
     }
 
     .game-card:hover {
-      transform: translateY(-5px);
-      border-color: #00ffff;
-      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
-      background: rgba(15, 25, 45, 0.9);
+      border-color: #475569;
     }
 
     .game-card h3 {
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       margin-top: 10px;
-      color: #ffffff;
-      font-weight: 800;
+      color: #f8fafc;
     }
 
     .game-card p {
-      font-size: 0.9rem;
-      color: #718096;
-      margin-top: 5px;
-      font-weight: 600;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 4px;
     }
   </style>
 </head>
@@ -159,22 +121,17 @@
   <header>
     <div class="logo">ATOM</div>
     <div class="search-box">
-      <input type="text" id="searchInput" onkeyup="filterGames()" placeholder="SEARCH GAMES...">
+      <input type="text" id="searchInput" onkeyup="filterGames()" placeholder="Search...">
     </div>
-    <div class="panic-hint">Press <kbd>Esc</kbd> to Panic</div>
+    <div class="panic-hint">Press <kbd>Esc</kbd> to exit</div>
   </header>
 
   <main>
-    <div class="hero-title">
-      <h2>SYSTEM PORTAL</h2>
-      <p>Select a node to launch</p>
-    </div>
-
     <div class="game-grid" id="gameGrid">
       <div class="game-card" data-title="Eaglercraft" onclick="alert('Upload your Eaglercraft files to GitHub first!')">
-        <div style="font-size: 2.5rem;">⛏️</div>
+        <div style="font-size: 2rem;">⛏️</div>
         <h3>Eaglercraft</h3>
-        <p>Minecraft Web</p>
+        <p>Minecraft</p>
       </div>
     </div>
   </main>
@@ -184,7 +141,7 @@
     const ctx = canvas.getContext('2d');
 
     let particles = [];
-    const numParticles = 120;
+    const numParticles = 80;
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
@@ -201,11 +158,10 @@
       reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2.5 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.6;
-        this.speedY = (Math.random() - 0.5) * 0.6;
-        this.alpha = Math.random() * 0.8 + 0.2;
-        this.glow = Math.random() > 0.8;
+        this.size = Math.random() * 1.5 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.2;
+        this.speedY = (Math.random() - 0.5) * 0.2;
+        this.alpha = Math.random() * 0.5 + 0.1;
       }
 
       update() {
@@ -222,13 +178,6 @@
         ctx.save();
         ctx.globalAlpha = this.alpha;
         ctx.fillStyle = '#ffffff';
-
-        if (this.glow) {
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = '#00ffff';
-          ctx.fillStyle = '#80ffff';
-        }
-
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
