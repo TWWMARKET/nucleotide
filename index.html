@@ -20,6 +20,7 @@
       overflow-x: hidden;
       min-height: 100vh;
       cursor: default;
+      transition: background-color 0.3s ease;
     }
 
     #space-bg {
@@ -32,25 +33,26 @@
       pointer-events: none;
     }
 
-    /* Developer Announcement Banner (Toggle on/off via display: none;) */
+    /* Developer Announcement Banner */
     #announcement-banner {
-      display: block; /* Change to 'none' to turn off */
-      background: #1e293b;
-      color: #38bdf8;
+      display: none; /* Controlled by script variables below */
       text-align: center;
       padding: 8px;
       font-size: 0.85rem;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Top Greeting Bar */
+    /* Top Bar with Live Clock */
     .top-bar {
       text-align: center;
-      padding: 6px;
-      background: rgba(15, 23, 42, 0.5);
+      padding: 6px 15px;
+      background: rgba(15, 23, 42, 0.6);
       font-size: 0.8rem;
-      color: #64748b;
+      color: #94a3b8;
       border-bottom: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     header {
@@ -82,7 +84,7 @@
       cursor: pointer;
       padding: 5px 10px;
       border-radius: 4px;
-      transition: color 0.2s;
+      transition: color 0.2s, background 0.2s;
     }
 
     .nav-btn:hover, .nav-btn.active {
@@ -196,6 +198,7 @@
       border-radius: 4px;
       margin-bottom: 12px;
       cursor: pointer;
+      font-size: 0.85rem;
     }
 
     .color-swatches {
@@ -211,18 +214,30 @@
       cursor: pointer;
       border: 2px solid #334155;
     }
+
+    .device-info p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
   </style>
 </head>
 <body id="body-bg">
 
-  <!-- Developer Announcement Banner (Edit text here, change display in style to toggle off) -->
+  <!-- Developer Announcement Banner -->
   <div id="announcement-banner">
-    📢 <b>Developer Update:</b> Welcome to Nucleotide! More games coming soon.
+    <span id="announcement-author" style="font-weight: bold; margin-right: 5px;"></span>
+    <span id="announcement-text"></span>
   </div>
 
-  <!-- Top Greeting Bar -->
+  <!-- Top Greeting & Clock Bar -->
   <div class="top-bar">
-    <span id="greeting-text">How are you today?</span> | Timezone: <span id="display-timezone">UTC</span> | Battery: <span id="battery-status">Loading...</span>
+    <span id="greeting-text">How are you today?</span>
+    <div>
+      <span id="live-clock">--:-- --</span> | 
+      <span id="display-timezone">Local</span> | 
+      Battery: <span id="battery-status">Loading...</span>
+    </div>
   </div>
 
   <canvas id="space-bg"></canvas>
@@ -244,14 +259,7 @@
   <main>
     <!-- GAMES TAB -->
     <div id="games" class="section-content active">
-      <div class="game-grid" id="itemGrid">
-        <!-- Add your game cards here when ready -->
-        <div class="card" data-title="Example Game">
-          <div style="font-size: 2rem;">🎮</div>
-          <h3>Example Game</h3>
-          <p>Ready for files</p>
-        </div>
-      </div>
+      <div class="game-grid" id="itemGrid"></div>
     </div>
 
     <!-- MUSIC TAB -->
@@ -260,7 +268,7 @@
         <div class="card">
           <div style="font-size: 2rem;">🎵</div>
           <h3>Music Player</h3>
-          <p>Audio streaming placeholder</p>
+          <p>Audio streamer</p>
         </div>
       </div>
     </div>
@@ -271,7 +279,7 @@
         <div class="card">
           <div style="font-size: 2rem;">🍿</div>
           <h3>Movie Streamer</h3>
-          <p>Video placeholder</p>
+          <p>Video player</p>
         </div>
       </div>
     </div>
@@ -285,45 +293,81 @@
           <h3>Background Color</h3>
           <div class="color-swatches">
             <div class="swatch" style="background: #0b0f19;" onclick="setBg('#0b0f19')" title="Dark"></div>
-            <div class="swatch" style="background: #1a0f1f;" onclick="setBg('#1a0f1f')" title="Pink/Purple"></div>
+            <div class="swatch" style="background: #1a0f1f;" onclick="setBg('#1a0f1f')" title="Pink"></div>
             <div class="swatch" style="background: #0f1915;" onclick="setBg('#0f1915')" title="Green"></div>
-            <div class="swatch" style="background: #0f1419;" onclick="setBg('#0f1419')" title="Slate Blue"></div>
+            <div class="swatch" style="background: #0f1419;" onclick="setBg('#0f1419')" title="Blue"></div>
           </div>
+        </div>
+
+        <!-- Seasonal Theme Presets -->
+        <div class="settings-card">
+          <h3>Seasonal Theme</h3>
+          <label>Select Theme Preset</label>
+          <select id="themeSelect" onchange="setSeasonTheme(this.value)">
+            <option value="auto">Auto (Current Month)</option>
+            <option value="halloween">Halloween (October)</option>
+            <option value="thanksgiving">Thanksgiving (November)</option>
+            <option value="christmas">Christmas (December)</option>
+            <option value="default">Default Dark</option>
+          </select>
+        </div>
+
+        <!-- Background Particle Shape -->
+        <div class="settings-card">
+          <h3>Background Particles</h3>
+          <label>Particle Shape</label>
+          <select id="particleSelect" onchange="setParticleShape(this.value)">
+            <option value="stars">Stars / Specks</option>
+            <option value="snowflakes">Snowflakes</option>
+            <option value="leaves">Leaves</option>
+            <option value="orbs">Spooky Orbs</option>
+          </select>
         </div>
 
         <!-- Cursor Styles -->
         <div class="settings-card">
           <h3>Cursor Style</h3>
-          <label>Choose Cursor Shape/Color</label>
-          <select onchange="setCursor(this.value)">
+          <label>Choose Cursor Shape</label>
+          <select id="cursorSelect" onchange="setCursor(this.value)">
             <option value="default">Default</option>
             <option value="crosshair">Crosshair</option>
-            <option value="pointer">Pointer Hand</option>
+            <option value="pointer">Pointer</option>
             <option value="text">I-Beam</option>
           </select>
         </div>
 
-        <!-- Tab Cloaker -->
+        <!-- Tab Cloaker & about:blank -->
         <div class="settings-card">
-          <h3>Tab Cloak</h3>
-          <label>Disguise Browser Tab</label>
+          <h3>Tab Cloak & Unblock</h3>
+          <label>Disguise Tab Title/Icon</label>
           <button onclick="cloakTab('Google Classroom', 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico')">Google Classroom</button>
           <button onclick="cloakTab('IXL | Math and English', 'https://www.ixl.com/favicon.ico')">IXL</button>
           <button onclick="cloakTab('Canvas', 'https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico')">Canvas</button>
-          <button onclick="cloakTab('Nucleotide', 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico')">Reset</button>
+          <button onclick="cloakTab('Nucleotide', 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico')">Reset Cloak</button>
+          <button style="background: #2563eb; font-weight: bold; margin-top: 5px;" onclick="openAboutBlank()">Open in about:blank</button>
         </div>
 
         <!-- Timezone Settings -->
         <div class="settings-card">
           <h3>Timezone Preset</h3>
           <label>Select Timezone</label>
-          <select onchange="setTimezone(this.value)">
+          <select id="timezoneSelect" onchange="setTimezone(this.value)">
+            <option value="local">Local Time</option>
             <option value="UTC">UTC</option>
-            <option value="America/New_York">Eastern Time (ET)</option>
-            <option value="America/Chicago">Central Time (CT)</option>
-            <option value="America/Denver">Mountain Time (MT)</option>
-            <option value="America/Los_Angeles">Pacific Time (PT)</option>
+            <option value="America/New_York">Eastern (ET)</option>
+            <option value="America/Chicago">Central (CT)</option>
+            <option value="America/Denver">Mountain (MT)</option>
+            <option value="America/Los_Angeles">Pacific (PT)</option>
           </select>
+        </div>
+
+        <!-- About Device Specs -->
+        <div class="settings-card device-info">
+          <h3>About / Device Specs</h3>
+          <p><b>OS / User-Agent:</b> <span id="dev-ua">Loading...</span></p>
+          <p><b>Screen Resolution:</b> <span id="dev-res">Loading...</span></p>
+          <p><b>CPU Cores:</b> <span id="dev-cores">Loading...</span></p>
+          <p><b>Device RAM (Est):</b> <span id="dev-ram">Loading...</span></p>
         </div>
 
       </div>
@@ -331,7 +375,47 @@
   </main>
 
   <script>
-    /* Tab Switching Logic */
+    /* ==========================================
+       ANNOUNCEMENT BANNER CONTROLS (EDIT HERE)
+       ========================================== */
+    const SHOW_ANNOUNCEMENT = true; // Set to 'false' to turn off completely
+    const ANNOUNCEMENT_AUTHOR = "Dev:"; // Change author name here (e.g. "Admin:", "Notice:")
+    const ANNOUNCEMENT_MESSAGE = "Welcome to Nucleotide! More games coming soon."; // Type your message here
+    const ANNOUNCEMENT_BG_COLOR = "#1e293b"; // Background color of the banner
+    const ANNOUNCEMENT_TEXT_COLOR = "#38bdf8"; // Text color of the banner
+    /* ========================================== */
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Setup Announcement Banner from variables above
+      const banner = document.getElementById('announcement-banner');
+      if (SHOW_ANNOUNCEMENT) {
+        banner.style.display = 'block';
+        banner.style.backgroundColor = ANNOUNCEMENT_BG_COLOR;
+        banner.style.color = ANNOUNCEMENT_TEXT_COLOR;
+        document.getElementById('announcement-author').innerText = ANNOUNCEMENT_AUTHOR;
+        document.getElementById('announcement-text').innerText = ANNOUNCEMENT_MESSAGE;
+      }
+
+      // Load saved user settings
+      let savedBg = localStorage.getItem('nucleotide_bg');
+      if (savedBg) setBg(savedBg, false);
+
+      let savedCursor = localStorage.getItem('nucleotide_cursor');
+      if (savedCursor) setCursor(savedCursor, false);
+
+      let savedTz = localStorage.getItem('nucleotide_tz');
+      if (savedTz) setTimezone(savedTz, false);
+
+      let savedTheme = localStorage.getItem('nucleotide_theme') || 'auto';
+      document.getElementById('themeSelect').value = savedTheme;
+      setSeasonTheme(savedTheme, false);
+
+      loadDeviceSpecs();
+      updateClock();
+      setInterval(updateClock, 1000);
+    });
+
+    /* Tab Switcher */
     function switchTab(tabId, btn) {
       document.querySelectorAll('.section-content').forEach(sec => sec.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -339,14 +423,17 @@
       btn.classList.add('active');
     }
 
-    /* Background Color Picker */
-    function setBg(color) {
+    /* Background Color */
+    function setBg(color, save = true) {
       document.getElementById('body-bg').style.backgroundColor = color;
+      if (save) localStorage.setItem('nucleotide_bg', color);
     }
 
-    /* Cursor Changer */
-    function setCursor(style) {
+    /* Cursor Style */
+    function setCursor(style, save = true) {
       document.body.style.cursor = style;
+      document.getElementById('cursorSelect').value = style;
+      if (save) localStorage.setItem('nucleotide_cursor', style);
     }
 
     /* Tab Cloaker */
@@ -355,12 +442,97 @@
       document.getElementById('favicon').href = iconUrl;
     }
 
-    /* Timezone Selector */
-    function setTimezone(tz) {
-      document.getElementById('display-timezone').innerText = tz;
+    /* Open Entire Site in about:blank Window */
+    function openAboutBlank() {
+      const win = window.open('about:blank', '_blank');
+      if (win) {
+        win.document.write(`
+          <html style="height:100%;margin:0;padding:0;">
+            <head><title>Google Docs</title></head>
+            <body style="height:100%;margin:0;padding:0;overflow:hidden;">
+              <iframe src="${window.location.href}" style="width:100%;height:100%;border:none;margin:0;padding:0;"></iframe>
+            </body>
+          </html>
+        `);
+        win.document.close();
+      } else {
+        alert('Pop-up blocked! Allow pop-ups for this site to open about:blank.');
+      }
     }
 
-    /* Device Battery API */
+    /* Timezone & Exact Live Clock */
+    let currentTz = localStorage.getItem('nucleotide_tz') || 'local';
+    function setTimezone(tz, save = true) {
+      currentTz = tz;
+      document.getElementById('display-timezone').innerText = tz === 'local' ? 'Local' : tz;
+      document.getElementById('timezoneSelect').value = tz;
+      if (save) localStorage.setItem('nucleotide_tz', tz);
+      updateClock();
+    }
+
+    function updateClock() {
+      const now = new Date();
+      let options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      if (currentTz !== 'local') {
+        options.timeZone = currentTz;
+      }
+      try {
+        document.getElementById('live-clock').innerText = new Intl.DateTimeFormat([], options).format(now);
+      } catch (e) {
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+      }
+    }
+
+    /* Seasonal Auto-Theme Switcher */
+    let currentParticleShape = localStorage.getItem('nucleotide_particle') || 'stars';
+    let currentParticleColor = '#ffffff';
+
+    function setSeasonTheme(theme, save = true) {
+      let month = new Date().getMonth(); 
+      if (save) localStorage.setItem('nucleotide_theme', theme);
+
+      let selectedTheme = theme;
+      if (theme === 'auto') {
+        if (month === 9) selectedTheme = 'halloween';
+        else if (month === 10) selectedTheme = 'thanksgiving';
+        else if (month === 11) selectedTheme = 'christmas';
+        else selectedTheme = 'default';
+      }
+
+      if (selectedTheme === 'halloween') {
+        setBg('#120a17', false);
+        currentParticleColor = '#ff7700';
+        currentParticleShape = 'orbs';
+      } else if (selectedTheme === 'thanksgiving') {
+        setBg('#170e0a', false);
+        currentParticleColor = '#d97706';
+        currentParticleShape = 'leaves';
+      } else if (selectedTheme === 'christmas') {
+        setBg('#0a1715', false);
+        currentParticleColor = '#e2e8f0';
+        currentParticleShape = 'snowflakes';
+      } else {
+        setBg('#0b0f19', false);
+        currentParticleColor = '#ffffff';
+        currentParticleShape = 'stars';
+      }
+      document.getElementById('particleSelect').value = currentParticleShape;
+    }
+
+    function setParticleShape(shape) {
+      currentParticleShape = shape;
+      localStorage.setItem('nucleotide_particle', shape);
+    }
+
+    /* Device Specs Generator */
+    function loadDeviceSpecs() {
+      document.getElementById('dev-ua').innerText = navigator.platform || 'Unknown OS';
+      document.getElementById('dev-res').innerText = `${window.screen.width} x ${window.screen.height}`;
+      document.getElementById('dev-cores').innerText = navigator.hardwareConcurrency || 'N/A';
+      document.getElementById('dev-ram').innerText = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'N/A';
+    }
+
+    /* Device Battery */
     if (navigator.getBattery) {
       navigator.getBattery().then(battery => {
         function updateBattery() {
@@ -374,11 +546,11 @@
       document.getElementById('battery-status').innerText = 'N/A';
     }
 
-    /* Space Background Particles */
+    /* Particle Background Engine */
     const canvas = document.getElementById('space-bg');
     const ctx = canvas.getContext('2d');
     let particles = [];
-    const numParticles = 60;
+    const numParticles = 70;
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
@@ -394,26 +566,39 @@
       reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 1.5 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.1;
-        this.speedY = (Math.random() - 0.5) * 0.1;
-        this.alpha = Math.random() * 0.4 + 0.1;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = Math.random() * 0.5 + 0.2;
+        this.alpha = Math.random() * 0.6 + 0.2;
       }
       update() {
         this.x += this.speedX;
         this.y += this.speedY;
         if (this.x < 0) this.x = canvas.width;
         if (this.x > canvas.width) this.x = 0;
-        if (this.y < 0) this.y = canvas.height;
         if (this.y > canvas.height) this.y = 0;
       }
       draw() {
         ctx.save();
         ctx.globalAlpha = this.alpha;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = currentParticleColor;
+
+        if (currentParticleShape === 'snowflakes') {
+          ctx.font = `${this.size * 5}px sans-serif`;
+          ctx.fillText('❄', this.x, this.y);
+        } else if (currentParticleShape === 'leaves') {
+          ctx.font = `${this.size * 4}px sans-serif`;
+          ctx.fillText('🍂', this.x, this.y);
+        } else if (currentParticleShape === 'orbs') {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
         ctx.restore();
       }
     }
