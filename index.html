@@ -19,8 +19,31 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       overflow-x: hidden;
       min-height: 100vh;
-      cursor: default;
       transition: background-color 0.3s ease;
+    }
+
+    /* Custom Cursor Element */
+    #custom-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 99999;
+      transform: translate(-50%, -50%);
+      transition: width 0.15s, height 0.15s, background-color 0.15s;
+      display: none;
+    }
+
+    body.custom-cursor-active {
+      cursor: none !important;
+    }
+    body.custom-cursor-active * {
+      cursor: none !important;
+    }
+
+    /* Cursive Font Class */
+    body.cursive-font {
+      font-family: 'Comic Sans MS', 'Dancing Script', cursive, sans-serif !important;
     }
 
     #space-bg {
@@ -35,24 +58,29 @@
 
     /* Developer Announcement Banner */
     #announcement-banner {
-      display: none; /* Controlled by script variables below */
+      display: none;
       text-align: center;
       padding: 8px;
       font-size: 0.85rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Top Bar with Live Clock */
+    /* Top Bar with Dynamic Theme Decorations */
     .top-bar {
       text-align: center;
       padding: 6px 15px;
       background: rgba(15, 23, 42, 0.6);
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: #94a3b8;
       border-bottom: 1px solid #1e293b;
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .top-bar-deco {
+      margin: 0 4px;
+      font-size: 0.95rem;
     }
 
     header {
@@ -65,7 +93,7 @@
     }
 
     .logo {
-      font-size: 1.8rem;
+      font-size: 2rem;
       font-family: 'Brush Script MT', cursive, sans-serif;
       letter-spacing: 1px;
       color: #f8fafc;
@@ -85,6 +113,7 @@
       padding: 5px 10px;
       border-radius: 4px;
       transition: color 0.2s, background 0.2s;
+      font-family: inherit;
     }
 
     .nav-btn:hover, .nav-btn.active {
@@ -101,6 +130,7 @@
       color: #fff;
       font-size: 0.85rem;
       outline: none;
+      font-family: inherit;
     }
 
     .panic-hint {
@@ -199,6 +229,7 @@
       margin-bottom: 12px;
       cursor: pointer;
       font-size: 0.85rem;
+      font-family: inherit;
     }
 
     .color-swatches {
@@ -224,15 +255,22 @@
 </head>
 <body id="body-bg">
 
+  <!-- Custom Cursor Div -->
+  <div id="custom-cursor"></div>
+
   <!-- Developer Announcement Banner -->
   <div id="announcement-banner">
     <span id="announcement-author" style="font-weight: bold; margin-right: 5px;"></span>
     <span id="announcement-text"></span>
   </div>
 
-  <!-- Top Greeting & Clock Bar -->
+  <!-- Top Greeting & Clock Bar with Theme Decorations -->
   <div class="top-bar">
-    <span id="greeting-text">How are you today?</span>
+    <div>
+      <span class="top-bar-deco" id="top-deco-left">🌟</span>
+      <span id="greeting-text">How are you today?</span>
+      <span class="top-bar-deco" id="top-deco-right">🌟</span>
+    </div>
     <div>
       <span id="live-clock">--:-- --</span> | 
       <span id="display-timezone">Local</span> | 
@@ -299,6 +337,16 @@
           </div>
         </div>
 
+        <!-- Font Style -->
+        <div class="settings-card">
+          <h3>Font Style</h3>
+          <label>Choose Site Font</label>
+          <select id="fontSelect" onchange="setFontStyle(this.value)">
+            <option value="cursive">Cursive</option>
+            <option value="sans">Sans-Serif (Standard)</option>
+          </select>
+        </div>
+
         <!-- Seasonal Theme Presets -->
         <div class="settings-card">
           <h3>Seasonal Theme</h3>
@@ -324,15 +372,16 @@
           </select>
         </div>
 
-        <!-- Cursor Styles -->
+        <!-- Cool Custom Cursors -->
         <div class="settings-card">
-          <h3>Cursor Style</h3>
-          <label>Choose Cursor Shape</label>
-          <select id="cursorSelect" onchange="setCursor(this.value)">
-            <option value="default">Default</option>
-            <option value="crosshair">Crosshair</option>
-            <option value="pointer">Pointer</option>
-            <option value="text">I-Beam</option>
+          <h3>Cool Custom Cursors</h3>
+          <label>Choose Cursor Style</label>
+          <select id="cursorSelect" onchange="setCursorStyle(this.value)">
+            <option value="default">Default Browser</option>
+            <option value="neon-dot">Neon Cyan Dot</option>
+            <option value="glowing-ring">Glowing Ring</option>
+            <option value="crosshair-target">Crosshair Target</option>
+            <option value="diamond">Diamond Shape</option>
           </select>
         </div>
 
@@ -376,17 +425,17 @@
 
   <script>
     /* ==========================================
-       ANNOUNCEMENT BANNER CONTROLS (EDIT HERE)
+       ANNOUNCEMENT BANNER CONTROLS
        ========================================== */
-    const SHOW_ANNOUNCEMENT = true; // Set to 'false' to turn off completely
-    const ANNOUNCEMENT_AUTHOR = "Dev:"; // Change author name here (e.g. "Admin:", "Notice:")
-    const ANNOUNCEMENT_MESSAGE = "Welcome to Nucleotide! More games coming soon."; // Type your message here
-    const ANNOUNCEMENT_BG_COLOR = "#1e293b"; // Background color of the banner
-    const ANNOUNCEMENT_TEXT_COLOR = "#38bdf8"; // Text color of the banner
+    const SHOW_ANNOUNCEMENT = true;
+    const ANNOUNCEMENT_AUTHOR = "Dev:";
+    const ANNOUNCEMENT_MESSAGE = "Welcome to Nucleotide! More games coming soon.";
+    const ANNOUNCEMENT_BG_COLOR = "#1e293b";
+    const ANNOUNCEMENT_TEXT_COLOR = "#38bdf8";
     /* ========================================== */
 
     window.addEventListener('DOMContentLoaded', () => {
-      // Setup Announcement Banner from variables above
+      // Setup Announcement Banner
       const banner = document.getElementById('announcement-banner');
       if (SHOW_ANNOUNCEMENT) {
         banner.style.display = 'block';
@@ -396,12 +445,15 @@
         document.getElementById('announcement-text').innerText = ANNOUNCEMENT_MESSAGE;
       }
 
-      // Load saved user settings
+      // Load saved settings
       let savedBg = localStorage.getItem('nucleotide_bg');
       if (savedBg) setBg(savedBg, false);
 
-      let savedCursor = localStorage.getItem('nucleotide_cursor');
-      if (savedCursor) setCursor(savedCursor, false);
+      let savedCursor = localStorage.getItem('nucleotide_cursor') || 'default';
+      setCursorStyle(savedCursor, false);
+
+      let savedFont = localStorage.getItem('nucleotide_font') || 'cursive';
+      setFontStyle(savedFont, false);
 
       let savedTz = localStorage.getItem('nucleotide_tz');
       if (savedTz) setTimezone(savedTz, false);
@@ -429,11 +481,63 @@
       if (save) localStorage.setItem('nucleotide_bg', color);
     }
 
-    /* Cursor Style */
-    function setCursor(style, save = true) {
-      document.body.style.cursor = style;
+    /* Font Style Changer */
+    function setFontStyle(style, save = true) {
+      if (style === 'cursive') {
+        document.body.classList.add('cursive-font');
+      } else {
+        document.body.classList.remove('cursive-font');
+      }
+      document.getElementById('fontSelect').value = style;
+      if (save) localStorage.setItem('nucleotide_font', style);
+    }
+
+    /* Custom Cursor Engine */
+    const cursorEl = document.getElementById('custom-cursor');
+    window.addEventListener('mousemove', (e) => {
+      cursorEl.style.left = e.clientX + 'px';
+      cursorEl.style.top = e.clientY + 'px';
+    });
+
+    function setCursorStyle(style, save = true) {
       document.getElementById('cursorSelect').value = style;
       if (save) localStorage.setItem('nucleotide_cursor', style);
+
+      if (style === 'default') {
+        document.body.classList.remove('custom-cursor-active');
+        cursorEl.style.display = 'none';
+      } else {
+        document.body.classList.add('custom-cursor-active');
+        cursorEl.style.display = 'block';
+        cursorEl.style.boxShadow = 'none';
+        cursorEl.style.border = 'none';
+        cursorEl.style.background = 'transparent';
+
+        if (style === 'neon-dot') {
+          cursorEl.style.width = '12px';
+          cursorEl.style.height = '12px';
+          cursorEl.style.backgroundColor = '#00ffff';
+          cursorEl.style.borderRadius = '50%';
+          cursorEl.style.boxShadow = '0 0 10px #00ffff, 0 0 20px #00ffff';
+        } else if (style === 'glowing-ring') {
+          cursorEl.style.width = '24px';
+          cursorEl.style.height = '24px';
+          cursorEl.style.border = '2px solid #38bdf8';
+          cursorEl.style.borderRadius = '50%';
+          cursorEl.style.boxShadow = '0 0 8px rgba(56, 189, 248, 0.6)';
+        } else if (style === 'crosshair-target') {
+          cursorEl.style.width = '20px';
+          cursorEl.style.height = '20px';
+          cursorEl.style.border = '2px dashed #ef4444';
+          cursorEl.style.borderRadius = '50%';
+        } else if (style === 'diamond') {
+          cursorEl.style.width = '14px';
+          cursorEl.style.height = '14px';
+          cursorEl.style.backgroundColor = '#10b981';
+          cursorEl.style.transform = 'translate(-50%, -50%) rotate(45deg)';
+          cursorEl.style.boxShadow = '0 0 10px #10b981';
+        }
+      }
     }
 
     /* Tab Cloaker */
@@ -483,7 +587,7 @@
       }
     }
 
-    /* Seasonal Auto-Theme Switcher */
+    /* Seasonal Auto-Theme & Top Bar Decorations */
     let currentParticleShape = localStorage.getItem('nucleotide_particle') || 'stars';
     let currentParticleColor = '#ffffff';
 
@@ -499,22 +603,33 @@
         else selectedTheme = 'default';
       }
 
+      const decoLeft = document.getElementById('top-deco-left');
+      const decoRight = document.getElementById('top-deco-right');
+
       if (selectedTheme === 'halloween') {
         setBg('#120a17', false);
         currentParticleColor = '#ff7700';
         currentParticleShape = 'orbs';
+        decoLeft.innerText = '🎃';
+        decoRight.innerText = '👻';
       } else if (selectedTheme === 'thanksgiving') {
         setBg('#170e0a', false);
         currentParticleColor = '#d97706';
         currentParticleShape = 'leaves';
+        decoLeft.innerText = '🍂';
+        decoRight.innerText = '🍁';
       } else if (selectedTheme === 'christmas') {
         setBg('#0a1715', false);
         currentParticleColor = '#e2e8f0';
         currentParticleShape = 'snowflakes';
+        decoLeft.innerText = '🎄';
+        decoRight.innerText = '❄️';
       } else {
         setBg('#0b0f19', false);
         currentParticleColor = '#ffffff';
         currentParticleShape = 'stars';
+        decoLeft.innerText = '🌟';
+        decoRight.innerText = '🌟';
       }
       document.getElementById('particleSelect').value = currentParticleShape;
     }
